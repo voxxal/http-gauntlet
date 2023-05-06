@@ -13,5 +13,5 @@ This project is still WIP but here are the planned topics.
 
 ## Usage
  - Start the `main.cr` server. (This requires the [Crystal Programming Language](https://crystal-lang.org) installed)
- - Write your HTTP request into the `client.py` BODY variable, and run client.py.
+ - Write your HTTP request into the `client.py` BODY variable, and run `client.py`.
  - Enjoy.
