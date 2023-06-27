@@ -2,7 +2,7 @@ require "spec"
 require "http/headers"
 require "./parser.cr"
 
-describe "HTTP" do
+describe "HTTP Parser" do
   describe "#read_request_line" do
     it "correctly parses valid request line" do
       request_line = IO::Memory.new "GET / HTTP/1.1"
@@ -57,6 +57,7 @@ describe "HTTP" do
   describe "#get_challenge" do
     it "accepts_valid" do
       get_challenge((RequestLine.new method: "GET", path: "/0-welcome"), HTTP::Headers.new)
+      get_challenge((RequestLine.new method: "GET", path: "/5-common-headers"), HTTP::Headers{"Hello" => "World"})
     end
 
     it "correctly catches invalid paths" do
@@ -69,14 +70,16 @@ describe "HTTP" do
         get_challenge((RequestLine.new method: "GET", path: "/abcdef"), HTTP::Headers.new)
       end
 
-      expect_raises(Exception, error) do
-        get_challenge((RequestLine.new method: "GET", path: "/ab-c-def"), HTTP::Headers.new)
-      end
+
     end
 
     it "correctly catches non-number id" do
-      expect_raises(Exception, "All paths in this gauntlet are formatted as /<id>-<key>, for example /0-welcome. It seems that your id is not a number. Double check that your id is a number.") do
+      error = "All paths in this gauntlet are formatted as /<id>-<key>, for example /0-welcome. It seems that your id is not a number. Double check that your id is a number."
+      expect_raises(Exception, error) do
         get_challenge((RequestLine.new method: "GET", path: "/abc-def"), HTTP::Headers.new)
+      end
+      expect_raises(Exception, error) do
+        get_challenge((RequestLine.new method: "GET", path: "/ab-c-def"), HTTP::Headers.new)
       end
     end
 

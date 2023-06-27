@@ -8,7 +8,7 @@ METHODS = %w(GET HEAD POST PUT DELETE CONNECT OPTIONS PATCH TRACE)
 record EndOfRequest
 record RequestLine, method : String, path : String
 record HeaderLine, name : String, value : String, bytesize : Int32
-alias Challenge = NamedTuple(method: String, key: String, instructions: String, headers: Hash(String, String) | Nil)
+alias Challenge = NamedTuple(method: String, key: String, instructions: String, headers: Hash(String, String) | Nil, body: String | Nil)
 
 def read_request_line(io) : RequestLine
   request_line = io.gets
@@ -23,8 +23,8 @@ def read_request_line(io) : RequestLine
   return RequestLine.new method: method, path: path
 end
 
-def get_challenge(req_line : RequestLine, headers : HTTP::Headers) : Challenge
-  portions = req_line.path[1..].split('-')
+def get_challenge(req_line : RequestLine, headers : HTTP::Headers, body : String | Nil) : Challenge
+  portions = req_line.path[1..].split('-', 2)
   raise "All paths in this gauntlet are formatted as /<id>-<key>, for example /0-welcome. 0 would be the id and welcome would be the key. Make sure that you typed the URL correctly" unless portions.size == 2
   id, key = portions
   begin
@@ -37,12 +37,19 @@ def get_challenge(req_line : RequestLine, headers : HTTP::Headers) : Challenge
 
   raise "Make sure your method is correct. the correct method to use is #{challenge[:method]} but you sent #{req_line.method}." unless challenge[:method] == req_line.method
 
+  if id.to_i > 5 
+    raise "Make sure to add the name header so I can identify who you are" unless headers["name"]?
+  end
+
   if chall_headers = challenge[:headers]
     chall_headers.each do |name, value|
       raise "Header #{name} does not exist" unless headers[name.downcase]?
       raise "Header #{name} with value #{headers[name.downcase]?} is wrong. (Expected a value of #{value})" unless headers[name.downcase]? == value
     end
   end
+
+  raise "Body does not matched the required body of #{body}." unless body == challenge[:body]
+
   return challenge
 end
 

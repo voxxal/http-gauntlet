@@ -6,7 +6,7 @@ The goal of the HTTP gauntlet is to provide an interactive tour of HTTP while he
 
 This project is still WIP but here are the planned topics.
  - [x] HTTP request header (method, path, protocol/version)
- - [ ] Headers
+ - [X] Headers
  - [ ] Body
    - [ ] Different body types
  - [ ] Cookies
